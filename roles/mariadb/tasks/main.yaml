@@ -1,0 +1,74 @@
+---
+- name: Add yum_repository for mariadb
+  yum_repository: 
+    name: MariaDB 
+    baseurl: "{{ mariadb['repo']['baseurl'] }}"
+    gpgkey: "{{ mariadb['repo']['gpgkey'] }}"
+    gpgcheck: 1 
+    description: MariaDB
+- name: Install mariadb
+  yum: 
+    name: MariaDB-server 
+    enablerepo: MariaDB 
+    state: latest
+- name: Copy mariadb configuration
+  template:
+    src: my.cnf.j2
+    dest: /etc/my.cnf.d/server.cnf
+  notify:
+  - Restart mariadb
+- name: Start mariadb
+  service: 
+    name: mariadb 
+    state: started 
+    enabled: true
+- name: Install library for DB
+  yum: 
+    name: MySQL-python 
+    state: latest
+- name: Set root password
+  mysql_user: 
+    login_user: root 
+    login_password: '' 
+    user: root 
+    password: dkagh1. 
+    state: present
+- name: Delete anonymous user in DB
+  mysql_user: 
+    login_user: root 
+    login_password: dkagh1. 
+    name: '' 
+    host_all: yes 
+    state: absent
+- name: Delete test db in DB
+  mysql_db: 
+    login_user: root 
+    login_password: dkagh1. 
+    db: test 
+    state: absent
+- name: Create DB for wordpress
+  mysql_db: 
+    login_user: root 
+    login_password: dkagh1. 
+    name: "{{ mariadb['wp']['name'] }}"
+    state: present
+- name: Create User for wordpress
+  mysql_user: 
+    login_user: root 
+    login_password: dkagh1. 
+    name: "{{ mariadb['wp']['user'] }}" 
+    password: "{{ mariadb['wp']['pwd'] }}"
+    priv: "{{ mariadb['wp']['priv'] }}" 
+    host: "{{ mariadb['wp']['host'] }}" 
+    state: present
+- name: Open mariadb port
+  firewalld: 
+    port: "{{ mariadb['port'] }}/tcp"
+    permanent: yes 
+    state: enabled 
+    immediate: yes
+- name: Active seboolean for mysql
+  seboolean: 
+    name: mysql_connect_any 
+    state: yes 
+    persistent: yes

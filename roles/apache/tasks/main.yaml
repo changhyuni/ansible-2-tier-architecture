@@ -1,0 +1,79 @@
+---
+- name: Install nfs-utils
+  yum:
+    name: nfs-utils
+    state: latest
+
+
+- name: Install httpd
+  yum: 
+    name: httpd 
+    state: latest
+
+- name: Copy configuration
+  template:
+    src: apache.conf.j2
+    dest: /etc/httpd/conf/httpd.conf
+  notify:
+  - Restart httpd
+
+
+
+- name: Delegate collecting facts for mariadb
+  setup:
+  delegate_to: dbnfs
+- name: Set facts for mariadb private ip
+  set_fact:
+    db_private_ip: "{{ ansible_eth1.ipv4.address }}"
+
+
+
+- name: Mount nfs share
+  mount:
+    path: /var/www/html
+    src: "{{ db_private_ip }}:{{ nfs['exports']['directory'] }}"
+    fstype: nfs
+    state: mounted
+
+- name: Open http port
+  firewalld: 
+    port: "{{ apache['port'] }}/tcp"
+    permanent: yes 
+    state: enabled 
+    immediate: yes
+
+
+- name: selinux의 위배되는 정책을 허용해 줍니다. 
+  seboolean:
+    name: "{{ item }}"
+    state: yes
+    persistent: yes
+  with_items: "{{ sebool_httpd_lists }}"
+
+
+
+- name: Install remi-release-7 for php74
+  yum: 
+    name: "{{ php['repo']['pkg'] }}"
+    state: latest
+
+
+- name: Install php and php-mysql 
+  yum: 
+    name: php,php-mysql 
+    enablerepo: remi-php74 
+    state: latest
+
+
+- name: Install nfs-utils for mount
+  yum:
+    name: nfs-utils
+    state: latest
+
+
+
+- name: Start httpd
+  service: 
+    name: httpd 
+    state: started 
+    enabled: true

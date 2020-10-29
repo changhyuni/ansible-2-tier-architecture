@@ -1,0 +1,12 @@
+---
+sebool_httpd_lists:
+  - httpd_can_network_connect
+  - httpd_can_network_connect_db
+  - httpd_use_nfs
+
+apache:
+  port: 80
+
+php:
+  repo: 
+    pkg: "https://rpms.remirepo.net/enterprise/remi-release-7.rpm "

@@ -1,0 +1,10 @@
+haproxy:
+  frontend:
+    port: 80
+  backend:
+    name: wordpress
+    balance_type: roundrobin
+    wordpress1:
+      port: 80
+    wordpress2:
+      port: 80

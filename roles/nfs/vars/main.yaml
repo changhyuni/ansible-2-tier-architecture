@@ -1,0 +1,5 @@
+---
+firewall_nfs_lists:
+  - nfs
+  - rpc-bind
+  - mountd

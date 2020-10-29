@@ -1,0 +1,10 @@
+- block:
+  - name: epel-release 최신버전을 설치합니다.
+    yum: 
+      name: epel-release 
+      state: latest
+  - name: seboolean 사용을 위한 libsemanage-python 설치합니다. 
+    yum: 
+      name: libsemanage-python 
+      state: latest
+  when: ansible_distribution == 'CentOS'  

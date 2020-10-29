@@ -1,0 +1,43 @@
+
+---
+- name: Deploy to CentOS
+  block:
+  - name: Install haproxy
+    yum:
+      name: haproxy
+      state: latest
+  - name: Open http port
+    firewalld: 
+      port: "{{ haproxy['frontend']['port'] }}/tcp" 
+      permanent: yes 
+      state: enabled 
+      immediate: yes    
+
+  - name: Active seboolean for httpd  
+    seboolean: 
+      name: haproxy_connect_any
+      state: yes 
+      persistent: yes
+
+  - name: Set facts for haproxy public ip
+    set_fact:
+      haproxy_public_ip: "{{ ansible_eth0.ipv4.address }}"
+  - name: Delegate collecting facts for wordpress1
+    setup:
+    delegate_to: webserver1
+  - name: Set facts for wordpress1 private ip
+    set_fact:
+      wordpress1_private_ip: "{{ ansible_eth1.ipv4.address }}"
+  - name: Delegate collecting facts for wordpress2
+    setup:
+    delegate_to: webserver2
+  - name: Set facts for wordpress2 private ip
+    set_fact:
+      wordpress2_private_ip: "{{ ansible_eth1.ipv4.address }}"
+  - name: Copy haproxy configuration
+    template:
+      src: haproxy.cfg.j2
+      dest: /etc/haproxy/haproxy.cfg
+    notify:
+    - Restart haproxy service
+  when: ansible_distribution == "CentOS"

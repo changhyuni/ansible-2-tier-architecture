@@ -1,0 +1,11 @@
+mariadb:
+  repo:
+    baseurl: http://mirror.yongbok.net/mariadb/yum/10.5/centos7-amd64
+    gpgkey: http://mirror.yongbok.net/mariadb/yum/RPM-GPG-KEY-MariaDB 
+  wp:
+    name: wordpress_db
+    user: admin
+    pwd: dkagh1.
+    priv: wordpress_db.*:ALL,GRANT
+    host: '192.168.123.%'
+  port: 3306

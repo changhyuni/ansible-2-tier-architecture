@@ -1,0 +1,60 @@
+---
+- name: Install nfs-utils
+  yum:
+    name: nfs-utils
+    state: latest
+    
+- name: Create a directory for nfs exports
+  file:
+    path: "{{ nfs['exports']['directory'] }}"
+    state: directory
+    mode: '0775'
+
+- name: Create exports to webserver
+  template:
+    src: exports.j2
+    dest: /etc/exports
+  notify:
+  - Re-export all directories
+
+
+- name: Set wordpress url
+  set_fact:
+    wp_url: "https://ko.wordpress.org/wordpress-{{ wordpress['source']['version'] }}-{{ wordpress['source']['language'] }}.tar.gz"
+    wp_filename: "wordpress-{{ wordpress['source']['version'] }}-{{ wordpress['source']['language'] }}.tar.gz"
+
+- name: Download wordpress sources
+  get_url: 
+    url: "{{ wp_url }}"
+    dest: "/tmp/{{ wp_filename }}"
+
+
+- name: Unarchive wordpress archive
+  unarchive: 
+    src: "/tmp/{{ wp_filename }}"
+    dest: "{{ nfs['exports']['directory'] }}"
+    remote_src: yes 
+    owner: root 
+    group: root
+
+
+- name: Copy wp-config.php
+  template:
+    src: wp-config.php.j2
+    dest: "{{ nfs['exports']['directory'] }}/wordpress/wp-config.php"
+
+
+- name: Start nfs service
+  service:
+    name: nfs
+    enabled: true
+    state: started
+
+
+- name: Allow port for nfs, rpc-bind, mountd
+  firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  with_items: "{{ firewall_nfs_lists }}"
