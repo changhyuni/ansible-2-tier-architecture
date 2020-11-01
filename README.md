@@ -2,7 +2,7 @@
 
 Wordpress 와 MariaDB로 구성된 2-Tier 아키텍쳐를 제공합니다.  사용자는 외부 HAPROXY를 통해 Wordpress로 Roudrobin 되어 연결되 고가용성을 보장합니다. . Wordpress는 데이터베이스인 MariaDB와 연결되며, MariaDB는 Galera Module 을 통해 서로 데이터를 공유하게 됩니다. 설치과정은 생략하고, 모든건 Ansible Role 기반으로 배포됩니다.
 
-- Role
+- [Role](https://github.com/changhyuni/ansible-worker-2-tier-architecture/tree/master/roles)
 - Network Configuration
 - System Configuration
 
