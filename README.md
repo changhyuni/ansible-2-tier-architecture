@@ -24,7 +24,6 @@ Wordpress and MariaDB 2-Tier-Architecture Ansible Role base
 ### Open Source
 
 - Ansible
-- Ansible Worker (AWX)
 - Wordpress
 - MariaDB
 - KVM
